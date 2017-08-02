@@ -40,7 +40,9 @@ cache or a cache shared among a few users.
 
 @ifhtml
 The latest version of Polipo2 can be found on
-@uref{https://github.com/ssb22/polipo,the Polipo2 git repository}.
+@uref{https://github.com/ssb22/polipo2,the Polipo2 git repository};
+see also
+@uref{http://people.ds.cam.ac.uk/ssb22/adjuster/polipo2.html,the Polipo2 home page}.
 @end ifhtml
 
 This manual was originally written by
