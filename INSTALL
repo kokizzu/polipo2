@@ -1,18 +1,18 @@
-Polipo installation instructions
-================================
+Polipo2 installation instructions
+=================================
 
-1. Building and running polipo
-------------------------------
+1. Building and running polipo2
+-------------------------------
 
     $ make all
     $ su -c 'make install'
-    $ man polipo
-    $ polipo &
+    $ man polipo2
+    $ polipo2 &
 
-If you want Polipo to put itself into the background, you may replace
+If you want Polipo2 to put itself into the background, you may replace
 the last line with:
 
-    $ polipo daemonise=true logFile="/var/log/polipo.log"
+    $ polipo2 daemonise=true logFile="/var/log/polipo2.log"
 
 On SVR4 systems (Solaris, HP/UX), you will need to use one of the
 following (whichever works):
@@ -20,18 +20,18 @@ following (whichever works):
     $ make PLATFORM_DEFINES=-DSVR4 all
     $ make PLATFORM_DEFINES=-DSVR4 LDLIBS='-lsocket -lnsl -lresolv' all
 
-You can also use Polipo without installing:
+You can also use Polipo2 without installing:
 
     $ make
-    $ nroff -man polipo.man | more
-    $ ./polipo &
+    $ nroff -man polipo2.man | more
+    $ ./polipo2 &
 
 For information about building on Windows, please see the file README.Windows.
 
 2. Configuring your user-agent
 ------------------------------
 
-Once polipo is running, configure your user-agent (web browser) to use
+Once polipo2 is running, configure your user-agent (web browser) to use
 the proxy on `http://localhost:8123/'.  Depending on the user-agent,
 this is done either by setting the environment variable http_proxy,
 e.g.
@@ -40,33 +40,33 @@ e.g.
 
 or by using the browser's ``preferences'' menu.
 
-3. Configuring polipo
----------------------
+3. Configuring polipo2
+----------------------
 
 If you want to use an on-disk cache, you will need to create its root
 directory:
 
-    $ mkdir /var/cache/polipo/
+    $ mkdir /var/cache/polipo2/
 
 You should then arrange for cron to run the following on a regular
 basis:
 
-    killall -USR1 polipo
+    killall -USR1 polipo2
     sleep 1
-    polipo -x
-    killall -USR2 polipo
+    polipo2 -x
+    killall -USR2 polipo2
 
 If you want to use a configuration file, you should put it in one of
-the locations `/etc/polipo/config' or `~/.polipo'; you can also use
+the locations `/etc/polipo2/config' or `~/.polipo2'; you can also use
 the `-c' flag to put it in a non-standard location.  See the file
 `config.sample' for an example.
 
 You might also want to create a forbidden URLs file, which you should
-put either in one of `/etc/polipo/forbidden' or `~/.polipo-forbidden';
+put either in one of `/etc/polipo2/forbidden' or `~/.polipo2-forbidden';
 you can set the variable `forbiddenFile' in your config file if you
 want to put it in a non-standard location.  See `forbidden.sample' for
 an example.
 
 
-Juliusz Chroboczek
-<jch@pps.univ-paris-diderot.fr>
+Originally by Juliusz Chroboczek
+Polipo2 fork maintained by Silas S. Brown

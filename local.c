@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 int disableLocalInterface = 0;
 int disableConfiguration = 0;
@@ -46,7 +47,7 @@ preinitLocal()
     CONFIG_VARIABLE(disableLocalInterface, CONFIG_BOOLEAN,
                     "Disable the local configuration pages.");
     CONFIG_VARIABLE(disableConfiguration, CONFIG_BOOLEAN,
-                    "Disable reconfiguring Polipo at runtime.");
+                    "Disable reconfiguring Polipo2 at runtime.");
     CONFIG_VARIABLE(disableIndexing, CONFIG_BOOLEAN,
                     "Disable indexing of the local cache.");
     CONFIG_VARIABLE(disableServersList, CONFIG_BOOLEAN,
@@ -99,11 +100,11 @@ printConfig(FILE *out, char *dummy)
             "\"-//W3C//DTD HTML 4.01 Transitional//EN\" "
             "\"http://www.w3.org/TR/html4/loose.dtd\">\n"
             "<html><head>\n"
-            "<title>Polipo configuration</title>\n"
+            "<title>Polipo2 configuration</title>\n"
             "</head><body>\n"
-            "<h1>Polipo configuration</h1>\n");
+            "<h1>Polipo2 configuration</h1>\n");
     printConfigVariables(out, 1);
-    fprintf(out, "<p><a href=\"/polipo/\">back</a></p>");
+    fprintf(out, "<p><a href=\"/polipo2/\">back</a></p>");
     fprintf(out, "</body></html>\n");
 }
 
@@ -160,7 +161,7 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
     }
 
     hlen = snnprintf(buffer, 0, 1024,
-                     "\r\nServer: polipo"
+                     "\r\nServer: polipo2"
                      "\r\nContent-Type: text/html");
     object->date = current_time.tv_sec;
     object->age = current_time.tv_sec;
@@ -170,15 +171,15 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
     object->flags &= ~OBJECT_INITIAL;
     object->flags |= OBJECT_DYNAMIC;
 
-    if(object->key_size == 8 && memcmp(object->key, "/polipo/", 8) == 0) {
+    if(object->key_size == 8 && memcmp(object->key, "/polipo2/", 8) == 0) {
         objectPrintf(object, 0,
                      "<!DOCTYPE HTML PUBLIC "
                      "\"-//W3C//DTD HTML 4.01 Transitional//EN\" "
                      "\"http://www.w3.org/TR/html4/loose.dtd\">\n"
                      "<html><head>\n"
-                     "<title>Polipo</title>\n"
+                     "<title>Polipo2</title>\n"
                      "</head><body>\n"
-                     "<h1>Polipo</h1>\n"
+                     "<h1>Polipo2</h1>\n"
                      "<p><a href=\"status?\">Status report</a>.</p>\n"
                      "<p><a href=\"config?\">Current configuration</a>.</p>\n"
                      "<p><a href=\"servers?\">Known servers</a>.</p>\n"
@@ -187,36 +188,36 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
 #endif
                      "</body></html>\n");
         object->length = object->size;
-    } else if(matchUrl("/polipo/status", object)) {
+    } else if(matchUrl("/polipo2/status", object)) {
         objectPrintf(object, 0,
                      "<!DOCTYPE HTML PUBLIC "
                      "\"-//W3C//DTD HTML 4.01 Transitional//EN\" "
                      "\"http://www.w3.org/TR/html4/loose.dtd\">\n"
                      "<html><head>\n"
-                     "<title>Polipo status report</title>\n"
+                     "<title>Polipo2 status report</title>\n"
                      "</head><body>\n"
-                     "<h1>Polipo proxy on %s:%d: status report</h1>\n"
+                     "<h1>Polipo2 proxy on %s:%d: status report</h1>\n"
                      "<p>The %s proxy on %s:%d is %s.</p>\n"
                      "<p>There are %d public and %d private objects "
                      "currently in memory using %d KB in %d chunks "
                      "(%d KB allocated).</p>\n"
                      "<p>There are %d atoms.</p>"
-                     "<p><form method=POST action=\"/polipo/status?\">"
+                     "<p><form method=POST action=\"/polipo2/status?\">"
                      "<input type=submit name=\"init-forbidden\" "
                      "value=\"Read forbidden file\"></form>\n"
-                     "<form method=POST action=\"/polipo/status?\">"
+                     "<form method=POST action=\"/polipo2/status?\">"
                      "<input type=submit name=\"writeout-objects\" "
                      "value=\"Write out in-memory cache\"></form>\n"
-                     "<form method=POST action=\"/polipo/status?\">"
+                     "<form method=POST action=\"/polipo2/status?\">"
                      "<input type=submit name=\"discard-objects\" "
                      "value=\"Discard in-memory cache\"></form>\n"
-                     "<form method=POST action=\"/polipo/status?\">"
+                     "<form method=POST action=\"/polipo2/status?\">"
                      "<input type=submit name=\"reopen-log\" "
                      "value=\"Reopen log file\"></form>\n"
-                     "<form method=POST action=\"/polipo/status?\">"
+                     "<form method=POST action=\"/polipo2/status?\">"
                      "<input type=submit name=\"free-chunk-arenas\" "
                      "value=\"Free chunk arenas\"></form></p>\n"
-                     "<p><a href=\"/polipo/\">back</a></p>"
+                     "<p><a href=\"/polipo2/\">back</a></p>"
                      "</body></html>\n",
                      proxyName->string, proxyPort,
                      cacheIsShared ? "shared" : "private",
@@ -231,11 +232,11 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
                      used_atoms);
         object->expires = current_time.tv_sec;
         object->length = object->size;
-    } else if(matchUrl("/polipo/config", object)) {
+    } else if(matchUrl("/polipo2/config", object)) {
         fillSpecialObject(object, printConfig, NULL);
         object->expires = current_time.tv_sec + 5;
 #ifndef NO_DISK_CACHE
-    } else if(matchUrl("/polipo/index", object)) {
+    } else if(matchUrl("/polipo2/index", object)) {
         int len;
         char *root;
         if(disableIndexing) {
@@ -254,7 +255,7 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
         fillSpecialObject(object, plainIndexDiskObjects, root);
         free(root);
         object->expires = current_time.tv_sec + 5;
-    } else if(matchUrl("/polipo/recursive-index", object)) {
+    } else if(matchUrl("/polipo2/recursive-index", object)) {
         int len;
         char *root;
         if(disableIndexing) {
@@ -274,7 +275,7 @@ httpSpecialRequest(ObjectPtr object, int method, int from, int to,
         free(root);
         object->expires = current_time.tv_sec + 20;
 #endif
-    } else if(matchUrl("/polipo/servers", object)) {
+    } else if(matchUrl("/polipo2/servers", object)) {
         if(disableServersList) {
             abortObject(object, 403, internAtom("Action not allowed"));
             notifyObject(object);
@@ -397,7 +398,7 @@ httpSpecialDoSideFinish(AtomPtr data, HTTPRequestPtr requestor)
 {
     ObjectPtr object = requestor->object;
 
-    if(matchUrl("/polipo/config", object)) {
+    if(matchUrl("/polipo2/config", object)) {
         AtomListPtr list = NULL;
         int i, rc;
 
@@ -426,12 +427,12 @@ httpSpecialDoSideFinish(AtomPtr data, HTTPRequestPtr requestor)
         destroyAtomList(list);
         object->date = current_time.tv_sec;
         object->age = current_time.tv_sec;
-        object->headers = internAtom("\r\nLocation: /polipo/config?");
+        object->headers = internAtom("\r\nLocation: /polipo2/config?");
         object->code = 303;
         object->message = internAtom("Done");
         object->flags &= ~OBJECT_INITIAL;
         object->length = 0;
-    } else if(matchUrl("/polipo/status", object)) {
+    } else if(matchUrl("/polipo2/status", object)) {
         AtomListPtr list = NULL;
         int i;
 
@@ -476,7 +477,7 @@ httpSpecialDoSideFinish(AtomPtr data, HTTPRequestPtr requestor)
         destroyAtomList(list);
         object->date = current_time.tv_sec;
         object->age = current_time.tv_sec;
-        object->headers = internAtom("\r\nLocation: /polipo/status?");
+        object->headers = internAtom("\r\nLocation: /polipo2/status?");
         object->code = 303;
         object->message = internAtom("Done");
         object->flags &= ~OBJECT_INITIAL;
@@ -543,7 +544,7 @@ fillSpecialObject(ObjectPtr object, void (*fn)(FILE*, char*), void* closure)
         } while (rc < 0 && errno == EINTR);
         if(rc < 0) {
             do_log_error(L_ERROR, errno, "Couldn't restore signal mask");
-            polipoExit();
+            polipo2Exit();
         }
         return;
     }
@@ -556,7 +557,7 @@ fillSpecialObject(ObjectPtr object, void (*fn)(FILE*, char*), void* closure)
         } while (rc < 0 && errno == EINTR);
         if(rc < 0) {
             do_log_error(L_ERROR, errno, "Couldn't restore signal mask");
-            polipoExit();
+            polipo2Exit();
             return;
         }
 

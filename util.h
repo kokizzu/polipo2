@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-/* These are Polipo's error codes.  They need to be positive integers,
+/* These are Polipo2's error codes.  They need to be positive integers,
    and must not collide with possible errno values.
    Starting at 2^16 should be safe enough. */
 

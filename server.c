@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 int serverExpireTime =  24 * 60 * 60;
 int smallRequestTime = 10;
@@ -159,7 +160,7 @@ expireServersHandler(TimeEventHandlerPtr event)
                           expireServersHandler, 0, NULL);
     if(!e) {
         do_log(L_ERROR, "Couldn't schedule server expiry.\n");
-        polipoExit();
+        polipo2Exit();
     }
     return 1;
 }
@@ -1361,7 +1362,7 @@ httpServerDelayedFinish(HTTPConnectionPtr connection)
         if(!handler) {
             do_log(L_ERROR,
                    "Couldn't schedule delayed finish -- aborting.\n");
-            polipoExit();
+            polipo2Exit();
         }
     }
 }
@@ -2890,6 +2891,6 @@ listServers(FILE *out)
     }
     fprintf(out, "</tbody>\n");
     fprintf(out, "</table>\n");
-    fprintf(out, "<p><a href=\"/polipo/\">back</a></p>");
+    fprintf(out, "<p><a href=\"/polipo2/\">back</a></p>");
     fprintf(out, "</body></html>\n");
 }

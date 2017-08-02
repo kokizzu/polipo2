@@ -2,8 +2,8 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 MANDIR = $(PREFIX)/man
 INFODIR = $(PREFIX)/info
-LOCAL_ROOT = /usr/share/polipo/www
-DISK_CACHE_ROOT = /var/cache/polipo
+LOCAL_ROOT = /usr/share/polipo2/www
+DISK_CACHE_ROOT = /var/cache/polipo2
 
 # To compile with Unix CC:
 
@@ -72,8 +72,8 @@ OBJS = util.o event.o io.o chunk.o atom.o object.o log.o diskcache.o main.o \
        http_parse.o parse_time.o dns.o forbidden.o \
        md5import.o ftsimport.o socks.o mingw.o
 
-polipo$(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo$(EXE) $(OBJS) $(MD5LIBS) $(LDLIBS)
+polipo2$(EXE): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo2$(EXE) $(OBJS) $(MD5LIBS) $(LDLIBS)
 
 ftsimport.o: ftsimport.c fts_compat.c
 
@@ -81,7 +81,7 @@ md5import.o: md5import.c md5.c
 
 .PHONY: all install install.binary install.man
 
-all: polipo$(EXE) polipo.info html/index.html localindex.html
+all: polipo2$(EXE) polipo2.info html/index.html localindex.html
 
 install: install.binary install.man
 
@@ -89,43 +89,43 @@ install.binary: all
 	mkdir -p $(TARGET)$(BINDIR)
 	mkdir -p $(TARGET)$(LOCAL_ROOT)
 	mkdir -p $(TARGET)$(LOCAL_ROOT)/doc
-	rm -f $(TARGET)$(BINDIR)/polipo
-	cp -f polipo $(TARGET)$(BINDIR)/
+	rm -f $(TARGET)$(BINDIR)/polipo2
+	cp -f polipo2 $(TARGET)$(BINDIR)/
 	cp -f html/* $(TARGET)$(LOCAL_ROOT)/doc
 	cp -f localindex.html $(TARGET)$(LOCAL_ROOT)/index.html
 
 install.man: all
 	mkdir -p $(TARGET)$(MANDIR)/man1
 	mkdir -p $(TARGET)$(INFODIR)
-	cp -f polipo.man $(TARGET)$(MANDIR)/man1/polipo.1
-	cp polipo.info $(TARGET)$(INFODIR)/
-	install-info --info-dir=$(TARGET)$(INFODIR) polipo.info
+	cp -f polipo2.man $(TARGET)$(MANDIR)/man1/polipo2.1
+	cp polipo2.info $(TARGET)$(INFODIR)/
+	install-info --info-dir=$(TARGET)$(INFODIR) polipo2.info
 
 
-polipo.info: polipo.texi
-	makeinfo polipo.texi
+polipo2.info: polipo2.texi
+	makeinfo polipo2.texi
 
-html/index.html: polipo.texi
+html/index.html: polipo2.texi
 	mkdir -p html
-	makeinfo --html -o html polipo.texi
+	makeinfo --html -o html polipo2.texi
 
-polipo.html: polipo.texi
-	makeinfo --html --no-split --no-headers -o polipo.html polipo.texi
+polipo2.html: polipo2.texi
+	makeinfo --html --no-split --no-headers -o polipo2.html polipo2.texi
 
-polipo.pdf: polipo.texi
-	texi2pdf polipo.texi
+polipo2.pdf: polipo2.texi
+	texi2pdf polipo2.texi
 
-polipo.ps.gz: polipo.ps
-	gzip -c polipo.ps > polipo.ps.gz
+polipo2.ps.gz: polipo2.ps
+	gzip -c polipo2.ps > polipo2.ps.gz
 
-polipo.ps: polipo.dvi
-	dvips -Pwww -o polipo.ps polipo.dvi
+polipo2.ps: polipo2.dvi
+	dvips -Pwww -o polipo2.ps polipo2.dvi
 
-polipo.dvi: polipo.texi
-	texi2dvi polipo.texi
+polipo2.dvi: polipo2.texi
+	texi2dvi polipo2.texi
 
-polipo.man.html: polipo.man
-	rman -f html polipo.man > polipo.man.html
+polipo2.man.html: polipo2.man
+	rman -f html polipo2.man > polipo2.man.html
 
 TAGS: $(SRCS)
 	etags $(SRCS)
@@ -133,10 +133,10 @@ TAGS: $(SRCS)
 .PHONY: clean
 
 clean:
-	-rm -f polipo$(EXE) *.o *~ core TAGS gmon.out
-	-rm -f polipo.cp polipo.fn polipo.log polipo.vr
-	-rm -f polipo.cps polipo.info* polipo.pg polipo.toc polipo.vrs
-	-rm -f polipo.aux polipo.dvi polipo.ky polipo.ps polipo.tp
-	-rm -f polipo.dvi polipo.ps polipo.ps.gz polipo.pdf polipo.html
+	-rm -f polipo2$(EXE) *.o *~ core TAGS gmon.out
+	-rm -f polipo2.cp polipo2.fn polipo2.log polipo2.vr
+	-rm -f polipo2.cps polipo2.info* polipo2.pg polipo2.toc polipo2.vrs
+	-rm -f polipo2.aux polipo2.dvi polipo2.ky polipo2.ps polipo2.tp
+	-rm -f polipo2.dvi polipo2.ps polipo2.ps.gz polipo2.pdf polipo2.html
 	-rm -rf ./html/
-	-rm -f polipo.man.html
+	-rm -f polipo2.man.html

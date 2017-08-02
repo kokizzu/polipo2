@@ -1,3 +1,6 @@
+Polipo2 1.0:
+  * Initial fork of Polipo2 from Polipo.
+
 Polipo 1.1.2 (unreleased):
 
   * Implemented support for SOCKS5 authenticatin (thanks to Amir Hossein

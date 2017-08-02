@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2010 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 #ifndef NO_FORBIDDEN
 
@@ -304,7 +305,7 @@ initForbidden(void)
         forbiddenFile = expandTilde(forbiddenFile);
 
     if(forbiddenFile == NULL) {
-        forbiddenFile = expandTilde(internAtom("~/.polipo-forbidden"));
+        forbiddenFile = expandTilde(internAtom("~/.polipo2-forbidden"));
         if(forbiddenFile) {
             if(access(forbiddenFile->string, F_OK) < 0) {
                 releaseAtom(forbiddenFile);
@@ -314,8 +315,8 @@ initForbidden(void)
     }
 
     if(forbiddenFile == NULL) {
-        if(access("/etc/polipo/forbidden", F_OK) >= 0)
-            forbiddenFile = internAtom("/etc/polipo/forbidden");
+        if(access("/etc/polipo2/forbidden", F_OK) >= 0)
+            forbiddenFile = internAtom("/etc/polipo2/forbidden");
     }
 
     parseDomainFile(forbiddenFile, &forbiddenDomains, &forbiddenRegex);
@@ -325,7 +326,7 @@ initForbidden(void)
         uncachableFile = expandTilde(uncachableFile);
 
     if(uncachableFile == NULL) {
-        uncachableFile = expandTilde(internAtom("~/.polipo-uncachable"));
+        uncachableFile = expandTilde(internAtom("~/.polipo2-uncachable"));
         if(uncachableFile) {
             if(access(uncachableFile->string, F_OK) < 0) {
                 releaseAtom(uncachableFile);
@@ -335,8 +336,8 @@ initForbidden(void)
     }
 
     if(uncachableFile == NULL) {
-        if(access("/etc/polipo/uncachable", F_OK) >= 0)
-            uncachableFile = internAtom("/etc/polipo/uncachable");
+        if(access("/etc/polipo2/uncachable", F_OK) >= 0)
+            uncachableFile = internAtom("/etc/polipo2/uncachable");
     }
 
     parseDomainFile(uncachableFile, &uncachableDomains, &uncachableRegex);
@@ -345,7 +346,7 @@ initForbidden(void)
         forbiddenTunnelsFile = expandTilde(forbiddenTunnelsFile);
     
     if(forbiddenTunnelsFile == NULL) {
-        forbiddenTunnelsFile = expandTilde(internAtom("~/.polipo-forbiddenTunnels"));
+        forbiddenTunnelsFile = expandTilde(internAtom("~/.polipo2-forbiddenTunnels"));
         if(forbiddenTunnelsFile) {
             if(access(forbiddenTunnelsFile->string, F_OK) < 0) {
                 releaseAtom(forbiddenTunnelsFile);
@@ -355,8 +356,8 @@ initForbidden(void)
     }
     
     if(forbiddenTunnelsFile == NULL) {
-        if(access("/etc/polipo/forbiddenTunnels", F_OK) >= 0)
-            forbiddenTunnelsFile = internAtom("/etc/polipo/forbiddenTunnels");
+        if(access("/etc/polipo2/forbiddenTunnels", F_OK) >= 0)
+            forbiddenTunnelsFile = internAtom("/etc/polipo2/forbiddenTunnels");
     }
     
     parseDomainFile(forbiddenTunnelsFile, &forbiddenTunnelsDomains, &forbiddenTunnelsRegex);

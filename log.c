@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 #ifdef HAVE_SYSLOG
 #include <syslog.h>
@@ -59,7 +60,7 @@ preinitLog()
 {
     CONFIG_VARIABLE_SETTABLE(logLevel, CONFIG_HEX, configIntSetter,
                              "Logging level (max = " STR(LOGGING_MAX) ").");
-    CONFIG_VARIABLE(logFile, CONFIG_ATOM, "Log file (stderr if empty and logSyslog is unset, /var/log/polipo if empty and daemonise is true).");
+    CONFIG_VARIABLE(logFile, CONFIG_ATOM, "Log file (stderr if empty and logSyslog is unset, /var/log/polipo2 if empty and daemonise is true).");
     CONFIG_VARIABLE(logFilePermissions, CONFIG_OCTAL,
                     "Access rights of the logFile.");
     CONFIG_VARIABLE_SETTABLE(scrubLogs, CONFIG_BOOLEAN, configIntSetter,
@@ -106,7 +107,7 @@ void
 initLog(void)
 {
     if(daemonise && logFile == NULL && !logSyslog)
-        logFile = internAtom("/var/log/polipo");
+        logFile = internAtom("/var/log/polipo2");
 
     if(logFile != NULL && logFile->length > 0) {
         FILE *f;
@@ -136,7 +137,7 @@ initSyslog()
     if(logSyslog) {
         facility = translateFacility(logFacility);
         closelog();
-        openlog("polipo", LOG_PID, facility);
+        openlog("polipo2", LOG_PID, facility);
 
         if(!syslogBuf) {
             syslogBuf = strdup("");
@@ -234,7 +235,7 @@ translateFacility(AtomPtr facility)
     return LOG_USER;
 }
 
-/* Translate a Polipo error type into a syslog priority. */
+/* Translate a Polipo2 error type into a syslog priority. */
 
 static int
 translatePriority(int type)

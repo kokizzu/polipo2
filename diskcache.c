@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2010 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 #ifndef NO_DISK_CACHE
 
@@ -53,11 +54,11 @@ static DiskCacheEntryRec negativeEntry = {
 };
 
 #ifndef LOCAL_ROOT
-#define LOCAL_ROOT "/usr/share/polipo/www/"
+#define LOCAL_ROOT "/usr/share/polipo2/www/"
 #endif
 
 #ifndef DISK_CACHE_ROOT
-#define DISK_CACHE_ROOT "/var/cache/polipo/"
+#define DISK_CACHE_ROOT "/var/cache/polipo2/"
 #endif
 
 static int maxDiskEntriesSetter(ConfigVariablePtr, void*);
@@ -603,16 +604,16 @@ writeHeaders(int fd, int *body_offset_return,
     if(n < 0)
         goto overflow;
 
-    n = snnprintf(buf, n, bufsize, "\r\nX-Polipo-Location: ");
+    n = snnprintf(buf, n, bufsize, "\r\nX-Polipo2-Location: ");
     n = snnprint_n(buf, n, bufsize, object->key, object->key_size);
 
     if(object->age >= 0 && object->age != object->date) {
-        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo-Date: ");
+        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo2-Date: ");
         n = format_time(buf, n, bufsize, object->age);
     }
 
     if(object->atime >= 0) {
-        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo-Access: ");
+        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo2-Access: ");
         n = format_time(buf, n, bufsize, object->atime);
     }
 
@@ -626,7 +627,7 @@ writeHeaders(int fd, int *body_offset_return,
         goto overflow;
 
     if(body_offset > 0 && body_offset != n + 4)
-        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo-Body-Offset: %d",
+        n = snnprintf(buf, n, bufsize, "\r\nX-Polipo2-Body-Offset: %d",
                       body_offset);
 
     n = snnprintf(buf, n, bufsize, "\r\n\r\n");
@@ -820,7 +821,7 @@ validateLocalEntry(ObjectPtr object, int fd,
             object->etag = strdup(buf); /* okay if fails */
         object->message = internAtom("Okay");
         n = snnprintf(buf, 0, 512,
-                      "\r\nServer: Polipo"
+                      "\r\nServer: Polipo2"
                       "\r\nContent-Type: %s",
                       localObjectMimeType(object, &encoding));
         if(encoding != NULL)
@@ -854,7 +855,7 @@ validateEntry(ObjectPtr object, int fd,
     int dummy;
     int code;
     AtomPtr headers;
-    time_t date, last_modified, expires, polipo_age, polipo_access;
+    time_t date, last_modified, expires, polipo2_age, polipo2_access;
     int length;
     off_t offset = -1;
     int body_offset;
@@ -941,8 +942,8 @@ validateEntry(ObjectPtr object, int fd,
 
     rc = httpParseHeaders(0, NULL, buf, rc, NULL,
                           &headers, &length, &cache_control, NULL, NULL,
-                          &date, &last_modified, &expires, &polipo_age,
-                          &polipo_access, &body_offset,
+                          &date, &last_modified, &expires, &polipo2_age,
+                          &polipo2_access, &body_offset,
                           NULL, &etag, NULL,
                           NULL, NULL, &location, &via, NULL);
     if(rc < 0) {
@@ -958,10 +959,10 @@ validateEntry(ObjectPtr object, int fd,
         goto invalid;
     }
 
-    if(polipo_age < 0)
-        polipo_age = date;
+    if(polipo2_age < 0)
+        polipo2_age = date;
 
-    if(polipo_age < 0) {
+    if(polipo2_age < 0) {
         do_log(L_ERROR, "Undated disk entry for %s.\n", scrub(location));
         goto invalid;
     }
@@ -997,7 +998,7 @@ validateEntry(ObjectPtr object, int fd,
              (object->cache_control & CACHE_VARY)))) {
             if(date >= 0 && date != object->date)
                 goto invalid;
-            if(polipo_age >= 0 && polipo_age != object->age)
+            if(polipo2_age >= 0 && polipo2_age != object->age)
                 goto invalid;
         }
         if((object->cache_control & CACHE_VARY) && dontTrustVaryETag >= 1) {
@@ -1033,11 +1034,11 @@ validateEntry(ObjectPtr object, int fd,
     else if(object->expires > expires)
         dirty = 1;
     if(object->age < 0)
-        object->age = polipo_age;
-    else if(object->age > polipo_age)
+        object->age = polipo2_age;
+    else if(object->age > polipo2_age)
         dirty = 1;
-    if(object->atime <= polipo_access)
-        object->atime = polipo_access;
+    if(object->atime <= polipo2_access)
+        object->atime = polipo2_access;
     else
         dirty = 1;
 
@@ -2238,8 +2239,8 @@ indexDiskObjects(FILE *out, const char *root, int recursive)
                 fprintf(out, "</tt></td><td></td><td></td><td></td>");
             }
             if(isdir) {
-                fprintf(out, "<td><a href=\"/polipo/index?%s\">plain</a></td>"
-                        "<td><a href=\"/polipo/recursive-index?%s\">"
+                fprintf(out, "<td><a href=\"/polipo2/index?%s\">plain</a></td>"
+                        "<td><a href=\"/polipo2/recursive-index?%s\">"
                         "recursive</a></td>",
                         dobject->location, dobject->location);
             }
@@ -2255,7 +2256,7 @@ indexDiskObjects(FILE *out, const char *root, int recursive)
     }
 
  trailer:
-    fprintf(out, "<p><a href=\"/polipo/\">back</a></p>\n");
+    fprintf(out, "<p><a href=\"/polipo2/\">back</a></p>\n");
     fprintf(out, "</body></html>\n");
     return;
 }
@@ -2397,7 +2398,7 @@ expireFile(char *filename, struct stat *sb,
               diskCacheTruncateSize + 4 * dobject->body_offset && 
               t < current_time.tv_sec - diskCacheTruncateTime) {
         /* We need to copy rather than simply truncate in place: the
-           latter would confuse a running polipo. */
+           latter would confuse a running polipo2. */
         fd = open(dobject->filename, O_RDONLY | O_BINARY, 0);
         rc = unlink(dobject->filename);
         if(rc < 0) {

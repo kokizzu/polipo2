@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 static int getNextWord(const char *buf, int i, int *x_return, int *y_return);
 static int getNextToken(const char *buf, int i, int *x_return, int *y_return);
@@ -38,8 +39,8 @@ static AtomPtr atomConnection, atomProxyConnection, atomContentLength,
     atomETag, atomCacheControl, atomPragma, atomContentRange, atomRange,
     atomVia, atomVary, atomExpect, atomAuthorization,
     atomSetCookie, atomCookie, atomCookie2,
-    atomXPolipoDate, atomXPolipoAccess, atomXPolipoLocation, 
-    atomXPolipoBodyOffset;
+    atomXPolipo2Date, atomXPolipo2Access, atomXPolipo2Location, 
+    atomXPolipo2BodyOffset;
 
 AtomPtr atomContentType, atomContentEncoding;
 
@@ -104,10 +105,10 @@ initHttpParser()
     A(atomSetCookie, "set-cookie");
     A(atomCookie, "cookie");
     A(atomCookie2, "cookie2");
-    A(atomXPolipoDate, "x-polipo-date");
-    A(atomXPolipoAccess, "x-polipo-access");
-    A(atomXPolipoLocation, "x-polipo-location");
-    A(atomXPolipoBodyOffset, "x-polipo-body-offset");
+    A(atomXPolipo2Date, "x-polipo2-date");
+    A(atomXPolipo2Access, "x-polipo2-access");
+    A(atomXPolipo2Location, "x-polipo2-location");
+    A(atomXPolipo2BodyOffset, "x-polipo2-body-offset");
 #undef A
     return;
 
@@ -753,8 +754,8 @@ httpParseHeaders(int client, AtomPtr url,
                  int *len_return, CacheControlPtr cache_control_return,
                  HTTPConditionPtr *condition_return, int *te_return,
                  time_t *date_return, time_t *last_modified_return,
-                 time_t *expires_return, time_t *polipo_age_return,
-                 time_t *polipo_access_return, int *polipo_body_offset_return,
+                 time_t *expires_return, time_t *polipo2_age_return,
+                 time_t *polipo2_access_return, int *polipo2_body_offset_return,
                  int *age_return, char **etag_return, AtomPtr *expect_return,
                  HTTPRangePtr range_return, HTTPRangePtr content_range_return,
                  char **location_return, AtomPtr *via_return,
@@ -768,8 +769,8 @@ httpParseHeaders(int client, AtomPtr url,
         name_start, name_end, value_start, value_end, 
         token_start, token_end, end;
     AtomPtr name = NULL;
-    time_t date = -1, last_modified = -1, expires = -1, polipo_age = -1,
-        polipo_access = -1, polipo_body_offset = -1;
+    time_t date = -1, last_modified = -1, expires = -1, polipo2_age = -1,
+        polipo2_access = -1, polipo2_body_offset = -1;
     int len = -1;
     CacheControlRec cache_control;
     char *endptr;
@@ -959,7 +960,7 @@ httpParseHeaders(int client, AtomPtr url,
                   name == atomIfModifiedSince || 
                   name == atomIfUnmodifiedSince ||
                   name == atomLastModified ||
-                  name == atomXPolipoDate || name == atomXPolipoAccess) {
+                  name == atomXPolipo2Date || name == atomXPolipo2Access) {
             time_t t;
             j = parse_time(buf, value_start, value_end, &t);
             if(j < 0) {
@@ -985,10 +986,10 @@ httpParseHeaders(int client, AtomPtr url,
                 ims = t;
             else if(name == atomIfUnmodifiedSince)
                 inms = t;
-            else if(name == atomXPolipoDate)
-                polipo_age = t;
-            else if(name == atomXPolipoAccess)
-                polipo_access = t;
+            else if(name == atomXPolipo2Date)
+                polipo2_age = t;
+            else if(name == atomXPolipo2Access)
+                polipo2_access = t;
         } else if(name == atomAge) {
             j = skipWhitespace(buf, value_start);
             if(j < 0) {
@@ -1004,14 +1005,14 @@ httpParseHeaders(int client, AtomPtr url,
                 do_log_n(L_WARN, buf + value_start, value_end - value_start);
                 do_log(L_WARN, " -- ignored.\n");
             }
-        } else if(name == atomXPolipoBodyOffset) {
+        } else if(name == atomXPolipo2BodyOffset) {
             j = skipWhitespace(buf, value_start);
             if(j < 0) {
                 do_log(L_ERROR, "Couldn't parse body offset.\n");
                 goto fail;
             } else {
                 errno = 0;
-                polipo_body_offset = strtol(buf + value_start, &endptr, 10);
+                polipo2_body_offset = strtol(buf + value_start, &endptr, 10);
                 if(errno == ERANGE || endptr <= buf + value_start) {
                     do_log(L_ERROR, "Couldn't parse body offset.\n");
                     goto fail;
@@ -1156,7 +1157,7 @@ httpParseHeaders(int client, AtomPtr url,
             } else {
                 do_log(L_WARN, "Range from server -- ignored\n");
             }
-        } else if(name == atomXPolipoLocation) {
+        } else if(name == atomXPolipo2Location) {
             if(location_return) {
                 location = 
                     strdup_n(buf + value_start, value_end - value_start);
@@ -1322,10 +1323,10 @@ httpParseHeaders(int client, AtomPtr url,
     if(date_return) *date_return = date;
     if(last_modified_return) *last_modified_return = last_modified;
     if(expires_return) *expires_return = expires;
-    if(polipo_age_return) *polipo_age_return = polipo_age;
-    if(polipo_access_return) *polipo_access_return = polipo_access;
-    if(polipo_body_offset_return)
-        *polipo_body_offset_return = polipo_body_offset;
+    if(polipo2_age_return) *polipo2_age_return = polipo2_age;
+    if(polipo2_access_return) *polipo2_access_return = polipo2_access;
+    if(polipo2_body_offset_return)
+        *polipo2_body_offset_return = polipo2_body_offset;
     if(age_return) *age_return = age;
     if(etag_return)
         *etag_return = etag;
@@ -1464,7 +1465,7 @@ urlIsLocal(const char *url, int len)
 int
 urlIsSpecial(const char *url, int len)
 {
-    return (len >= 8 && memcmp(url, "/polipo/", 8) == 0);
+    return (len >= 8 && memcmp(url, "/polipo2/", 9) == 0);
 }
 
 int

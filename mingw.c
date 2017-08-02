@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2006 by Dan Kennedy.
 Copyright (c) 2006 by Juliusz Chroboczek.
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 #ifndef WIN32 /*MINGW*/
 
@@ -177,7 +178,7 @@ win32_gettimeofday(struct timeval *tv, char *tz)
     long long        t;
 
     /* This implementation doesn't support the timezone parameter. That's Ok,
-     * as at present polipo always passed NULL as the second arg. We
+     * as at present polipo2 always passed NULL as the second arg. We
      * also need to make sure that we have at least 8 bytes of space to
      * do the math in - otherwise there will be overflow errors.
      */
@@ -444,7 +445,7 @@ win32_stat(const char *filename, struct stat *ss)
 #ifndef HAVE_READV_WRITEV
 
 int
-polipo_writev(int fd, const struct iovec *vector, int count)
+polipo2_writev(int fd, const struct iovec *vector, int count)
 {
     int rc;                     /* Return Code */
     if(count == 1) {
@@ -482,7 +483,7 @@ polipo_writev(int fd, const struct iovec *vector, int count)
 }
 
 int
-polipo_readv(int fd, const struct iovec *vector, int count)
+polipo2_readv(int fd, const struct iovec *vector, int count)
 {
     int ret = 0;                     /* Return value */
     int i;

@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 int disableProxy = 0;
 AtomPtr proxyName = NULL;
@@ -140,10 +141,10 @@ initHttp()
     }
 
     if(displayName == NULL)
-        displayName = internAtom("Polipo");
+        displayName = internAtom("Polipo2");
 
     if(authCredentials != NULL && authRealm == NULL)
-        authRealm = internAtom("Polipo");
+        authRealm = internAtom("Polipo2");
 
     if(allowedClients) {
         allowedNets = parseNetAddress(allowedClients);
@@ -192,7 +193,7 @@ initHttp()
     n = gethostname(buf, CHUNK_SIZE);
     if(n != 0) {
         do_log_error(L_WARN, errno, "Gethostname");
-        strcpy(buf, "polipo");
+        strcpy(buf, "polipo2");
         goto success;
     }
     /* gethostname doesn't necessarily NUL-terminate on overflow */
@@ -201,8 +202,8 @@ initHttp()
     if(strcmp(buf, "(none)") == 0 ||
        strcmp(buf, "localhost") == 0 ||
        strcmp(buf, "localhost.localdomain") == 0) {
-        do_log(L_WARN, "Couldn't determine host name -- using ``polipo''.\n");
-        strcpy(buf, "polipo");
+        do_log(L_WARN, "Couldn't determine host name -- using ``polipo2''.\n");
+        strcpy(buf, "polipo2");
         goto success;
     }
 

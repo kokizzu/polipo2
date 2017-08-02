@@ -1,5 +1,5 @@
-# Sample forbidden URLs file for polipo.  -*-sh-*-
-# Put this in /etc/polipo/forbidden or in ~/.polipo-forbidden.
+# Sample forbidden URLs file for polipo2.  -*-sh-*-
+# Put this in /etc/polipo2/forbidden or in ~/.polipo2-forbidden.
 
 # Forbid all hosts belonging to a given domain name:
 

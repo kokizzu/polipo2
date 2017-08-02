@@ -2,7 +2,7 @@
 #define _GNU_SOURCE
 #endif
 
-#include "polipo.h"
+#include "polipo2.h"
 
 #ifndef HAVE_FTS
 #include "fts_compat.c"

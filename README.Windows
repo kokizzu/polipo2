@@ -1,14 +1,14 @@
-Building Polipo on Windows
-==========================
+Building Polipo2 on Windows
+===========================
 
-There are two distinct ports of Polipo to Windows -- a port using the
+There are two distinct ports of Polipo2 to Windows -- a port using the
 Cygwin emulation libraries, and an experimental native port using Mingw.
 
 The Cygwin port is identical to the Unix binary.  Build it just like
 you would build under Unix -- just type ``make all'' in the directory
-where you untarred the Polipo sources.
+where you untarred the Polipo2 sources.
 
-In order to build the native port, cd to the Polipo directory, and do
+In order to build the native port, cd to the Polipo2 directory, and do
 
     make EXE=.exe LDLIBS=-lwsock32
 
@@ -23,16 +23,11 @@ to point make at the right compiler:
 
 The native port currently attempts to access files in locations that
 are typical for a Unix system; for example, it will attempt to read a
-configuration file /etc/polipo/config on the current drive.  You will
-probably need to point it at your config file with an explicit ``-c''
+configuration file /etc/polipo2/config on the current drive.  You will
+therefore need to point it at your config file with an explicit ``-c''
 command-line argument, and define at least the following configuration
 variables:
 
     dnsNameServer
     diskCacheRoot
     forbiddenFile
-
-Help with solving this issue would be very much appreciated.
-
-
-Juliusz Chroboczek

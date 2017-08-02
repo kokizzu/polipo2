@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 static int 
 httpAcceptAgain(TimeEventHandlerPtr event)
@@ -34,7 +35,7 @@ httpAcceptAgain(TimeEventHandlerPtr event)
         newevent = schedule_accept(fd, httpAccept, NULL);
         if(newevent == NULL) {
             do_log(L_ERROR, "Couldn't schedule accept.\n");
-            polipoExit();
+            polipo2Exit();
         }
     }
     return 1;
@@ -64,12 +65,12 @@ httpAccept(int fd, FdEventHandlerPtr event, AcceptRequestPtr request)
                                           sizeof(request->fd), &request->fd);
                 if(!again) {
                     do_log(L_ERROR, "Couldn't schedule accept -- aborting.\n");
-                    polipoExit();
+                    polipo2Exit();
                 }
             }
             return 1;
         } else {
-            polipoExit();
+            polipo2Exit();
             return 1;
         }
     }
@@ -306,7 +307,7 @@ httpClientDelayedShutdown(HTTPConnectionPtr connection)
         if(!handler) {
             do_log(L_ERROR, 
                    "Couldn't schedule delayed shutdown -- aborting.\n");
-            polipoExit();
+            polipo2Exit();
         }
     }
     return 1;

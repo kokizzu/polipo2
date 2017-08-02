@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +22,7 @@ THE SOFTWARE.
 */
 
 /* This file implements just enough of the fts family of functions
-   to make Polipo happy. */
+   to make Polipo2 happy. */
 
 #include <stdlib.h>
 #include <errno.h>

@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +21,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 /* Atoms are interned, read-only reference-counted strings.
 
    Interned means that equality of atoms is equivalent to structural
    equality -- you don't need to strcmp, you just compare the AtomPtrs.
-   This property is used throughout Polipo, e.g. to speed up the HTTP
+   This property is used throughout Polipo2, e.g. to speed up the HTTP
    parser.
 
-   Polipo's atoms may contain NUL bytes -- you can use internAtomN to
-   store any random binary data within an atom.  However, Polipo always
+   Polipo2's atoms may contain NUL bytes -- you can use internAtomN to
+   store any random binary data within an atom.  However, Polipo2 always
    terminates your data, so if you store textual data in an atom, you
    may use the result of atomString as though it were a (read-only)
    C string.

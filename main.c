@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2003-2006 by Juliusz Chroboczek
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "polipo.h"
+#include "polipo2.h"
 
 AtomPtr configFile = NULL;
 AtomPtr pidFile = NULL;
@@ -98,7 +99,7 @@ main(int argc, char **argv)
         configFile = expandTilde(configFile);
 
     if(configFile == NULL) {
-        configFile = expandTilde(internAtom("~/.polipo"));
+        configFile = expandTilde(internAtom("~/.polipo2"));
         if(configFile)
             if(access(configFile->string, F_OK) < 0) {
                 releaseAtom(configFile);
@@ -107,8 +108,8 @@ main(int argc, char **argv)
     }
 
     if(configFile == NULL) {
-        if(access("/etc/polipo/config", F_OK) >= 0)
-            configFile = internAtom("/etc/polipo/config");
+        if(access("/etc/polipo2/config", F_OK) >= 0)
+            configFile = internAtom("/etc/polipo2/config");
         if(configFile && access(configFile->string, F_OK) < 0) {
             releaseAtom(configFile);
             configFile = NULL;

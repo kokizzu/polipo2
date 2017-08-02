@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2006 by Dan Kennedy.
 Copyright (c) 2006 by Juliusz Chroboczek.
+Copyright (c) 2017 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +23,13 @@ THE SOFTWARE.
 */
 
 /* 
- * Polipo was originally designed to run on Unix-like systems. This
- * header file (and it's accompanying implementation file mingw.c) contain
- * code that allows polipo to run on Microsoft Windows too. 
+ * Polipo2 was originally designed to run on Unix-like systems. This
+ * header file (and its accompanying implementation file mingw.c) contain
+ * code that allows polipo2 to run on Microsoft Windows too. 
  *
  * The target MS windows compiler is Mingw (MINimal Gnu for Windows). The
- * code in this file probably get's us pretty close to MSVC also, but
- * this has not been tested. To build polipo for Mingw, define the MINGW
+ * code in this file probably gets us pretty close to MSVC also, but
+ * this has not been tested. To build polipo2 for Mingw, define the MINGW
  * symbol. For Unix or Unix-like systems, leave it undefined.
  */
 
@@ -188,8 +189,8 @@ struct iovec {
     void *iov_base;   /* Starting address */
     size_t iov_len;   /* Number of bytes */
 };
-#define WRITEV(x, y, z) polipo_writev(x, y, z)
-#define READV(x, y, z)  polipo_readv(x, y, z)
-int polipo_readv(int fd, const struct iovec *vector, int count);
-int polipo_writev(int fd, const struct iovec *vector, int count);
+#define WRITEV(x, y, z) polipo2_writev(x, y, z)
+#define READV(x, y, z)  polipo2_readv(x, y, z)
+int polipo2_readv(int fd, const struct iovec *vector, int count);
+int polipo2_writev(int fd, const struct iovec *vector, int count);
 #endif
