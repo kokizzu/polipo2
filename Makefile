@@ -67,12 +67,19 @@ SRCS = util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c main.c \
        http_parse.c parse_time.c dns.c forbidden.c \
        md5import.c md5.c ftsimport.c fts_compat.c socks.c mingw.c
 
+HEADERS = atom.h auth.h chunk.h client.h config.h \
+       dirent_compat.h diskcache.h dns.h event.h \
+       forbidden.h fts_compat.h ftsimport.h http.h \
+       http_parse.h io.h local.h log.h md5.h md5import.h \
+       mingw.h object.h parse_time.h polipo2.h server.h \
+       socks.h tunnel.h util.h
+
 OBJS = util.o event.o io.o chunk.o atom.o object.o log.o diskcache.o main.o \
        config.o local.o http.o client.o server.o auth.o tunnel.o \
        http_parse.o parse_time.o dns.o forbidden.o \
        md5import.o ftsimport.o socks.o mingw.o
 
-polipo2$(EXE): $(OBJS)
+polipo2$(EXE): $(OBJS) $(HEADERS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo2$(EXE) $(OBJS) $(MD5LIBS) $(LDLIBS)
 
 ftsimport.o: ftsimport.c fts_compat.c
