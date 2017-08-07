@@ -21,6 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+// #define DEBUG 1
+#if DEBUG
+#define VerboseDebug(...) fprintf (stderr, "DEBUG: " __VA_ARGS__)
+#else
+#define VerboseDebug(...) (void)0
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

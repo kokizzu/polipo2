@@ -112,12 +112,17 @@ discardServer(HTTPServerPtr server)
     HTTPServerPtr previous;
     assert(!server->request);
 
-    if(server == servers)
+    if(server == servers) {
+        VerboseDebug("discardServer head\n");
         servers = server->next;
-    else {
+    } else {
+        int count = 1;
         previous = servers;
-        while(previous->next != server)
+        while(previous->next != server) {
             previous = previous->next;
+            count++;
+        }
+        VerboseDebug("discardServer head+%d\n",count);
         previous->next = server->next;
     }
 
@@ -135,11 +140,16 @@ static int
 httpServerIdle(HTTPServerPtr server)
 {
     int i;
-    if(server->request) 
+    if(server->request) {
+      VerboseDebug("httpServerIdle=0 as it has requests\n");
         return 0;
+    }
     for(i = 0; i < server->maxslots; i++)
-        if(server->connection[i])
+        if(server->connection[i]) {
+          VerboseDebug("httpServerIdle=0 as it has connection in slot %d\n",i);
             return 0;
+        }
+    VerboseDebug("httpServerIdle=1\n");
     return 1;
 }
 
@@ -149,6 +159,7 @@ expireServersHandler(TimeEventHandlerPtr event)
     HTTPServerPtr server, next;
     TimeEventHandlerPtr e;
     server = servers;
+    VerboseDebug("expireServersHandler starting\n");
     while(server) {
         next = server->next;
         if(httpServerIdle(server) &&
@@ -156,6 +167,7 @@ expireServersHandler(TimeEventHandlerPtr event)
             discardServer(server);
         server = next;
     }
+    VerboseDebug("expireServersHandler finished\n");
     e = scheduleTimeEvent(serverExpireTime / 60 + 60, 
                           expireServersHandler, 0, NULL);
     if(!e) {
@@ -253,25 +265,30 @@ static HTTPServerPtr
 getServer(char *name, int port, int proxy)
 {
     HTTPServerPtr server;
-    int i;
+    int i=0;
 
     server = servers;
     while(server) {
         if(strcmp(server->name, name) == 0 && server->port == port &&
            server->isProxy == proxy) {
-            if(httpServerIdle(server) &&
+            int is_idle = httpServerIdle(server);
+            VerboseDebug("getServer(%s,%d,%d) matches server %d, idle=%d\n",name,port,proxy,i,is_idle);
+            if(is_idle &&
                server->time +  serverExpireTime < current_time.tv_sec) {
+                VerboseDebug("... expiring it\n");
                 discardServer(server);
                 server = NULL;
                 break;
             } else {
                 server->time = current_time.tv_sec;
+                VerboseDebug("... returning it\n");
                 return server;
             }
         }
-        server = server->next;
+        server = server->next; i++;
     }
-    
+
+    VerboseDebug("getServer(%s,%d,%d) allocating new server\n",name,port,proxy);
     server = malloc(sizeof(HTTPServerRec));
     if(server == NULL) {
         do_log(L_ERROR, "Couldn't allocate server.\n");
@@ -331,9 +348,11 @@ httpServerQueueRequest(HTTPServerPtr server, HTTPRequestPtr request)
     assert(request->request && request->request->request == request);
     assert(request->connection == NULL);
     if(server->request) {
+        VerboseDebug("httpServerQueueRequest: adding to end of queue\n");
         server->request_last->next = request;
         server->request_last = request;
     } else {
+        VerboseDebug("httpServerQueueRequest: setting as only queue item\n");
         server->request_last = request;
         server->request = request;
     }
@@ -345,6 +364,7 @@ httpServerAbort(HTTPConnectionPtr connection, int fail,
                 int code, AtomPtr message)
 {
     HTTPRequestPtr request = connection->request;
+    VerboseDebug("httpServerAbort\n");
     if(request) {
         if(request->request) {
             httpClientError(request->request, code, retainAtom(message));
@@ -365,6 +385,7 @@ void
 httpServerAbortRequest(HTTPRequestPtr request, int fail,
                        int code, AtomPtr message)
 {
+  VerboseDebug("httpServerAbortRequest\n");
     if(request->connection && request == request->connection->request) {
         httpServerAbort(request->connection, fail, code, message);
     } else {
@@ -387,6 +408,7 @@ httpServerAbortRequest(HTTPRequestPtr request, int fail,
 void 
 httpServerClientReset(HTTPRequestPtr request)
 {
+  VerboseDebug("httpServerClientReset\n");
     if(request->connection && 
        request->connection->fd >= 0 &&
        !request->connection->connecting &&
@@ -402,6 +424,7 @@ httpMakeServerRequest(char *name, int port, ObjectPtr object,
     HTTPServerPtr server;
     HTTPRequestPtr request;
     int rc;
+    VerboseDebug("httpMakeServerRequest(%s,%d)\n",name,port);
 
     assert(!(object->flags & OBJECT_INPROGRESS));
 
@@ -504,6 +527,7 @@ httpServerConnection(HTTPServerPtr server)
 
     for(i = 0; i < server->numslots; i++) {
         if(!server->connection[i]) {
+            VerboseDebug("httpServerConnection using slot %d\n",i);
             server->connection[i] = connection;
             break;
         }
@@ -533,6 +557,7 @@ int
 httpServerConnectionDnsHandler(int status, GethostbynameRequestPtr request)
 {
     HTTPConnectionPtr connection = request->data;
+    VerboseDebug("httpServerConnectionDnsHandler\n");
 
     httpSetTimeout(connection, -1);
 
@@ -591,7 +616,7 @@ httpServerConnectionHandler(int status,
                             ConnectRequestPtr request)
 {
     HTTPConnectionPtr connection = request->data;
-
+    VerboseDebug("httpServerConnectionHandler\n");
     assert(connection->fd < 0);
     if(request->fd >= 0) {
         int rc;
@@ -609,7 +634,7 @@ int
 httpServerSocksHandler(int status, SocksRequestPtr request)
 {
     HTTPConnectionPtr connection = request->data;
-
+    VerboseDebug("httpServerSocksHandler\n");
     assert(connection->fd < 0);
     if(request->fd >= 0) {
         connection->fd = request->fd;
@@ -621,6 +646,7 @@ httpServerSocksHandler(int status, SocksRequestPtr request)
 int
 httpServerConnectionHandlerCommon(int status, HTTPConnectionPtr connection)
 {
+  VerboseDebug("httpServerConnectionHandlerCommon\n");
     httpSetTimeout(connection, -1);
 
     if(status < 0) {
@@ -653,6 +679,7 @@ httpServerConnectionHandlerCommon(int status, HTTPConnectionPtr connection)
 int
 httpServerIdleHandler(int a, FdEventHandlerPtr event)
 {
+  VerboseDebug("httpServerIdleHandler\n");
     HTTPConnectionPtr connection = *(HTTPConnectionPtr*)event->data;
     HTTPServerPtr server = connection->server;
     int i;
@@ -678,6 +705,7 @@ httpServerIdleHandler(int a, FdEventHandlerPtr event)
 static void
 httpServerDiscardRequests(HTTPServerPtr server)
 {
+  VerboseDebug("httpServerDiscardRequests\n");
     HTTPRequestPtr request;
     while(server->request && !server->request->request) {
         request = server->request;
@@ -739,9 +767,13 @@ httpServerGetConnection(HTTPServerPtr server, int *idle_return)
     for(i = 0; i < server->numslots; i++) {
         if(server->connection[i]) {
             if(!server->connection[i]->connecting) {
+                VerboseDebug("httpServerGetConnection: slot %d has connection that's not connecting\n",i);
                 if(!server->connection[i]->request) {
-                    if(server->idleHandler[i])
+                    VerboseDebug("... it's idle (no requests), good candidate\n");
+                    if(server->idleHandler[i]) {
+                        VerboseDebug("... unregistering idle handler %d\n",i);
                         unregisterFdEvent(server->idleHandler[i]);
+                    }
                     server->idleHandler[i] = NULL;
                     if(j < 0) j = i;
                     idle++;
@@ -754,6 +786,7 @@ httpServerGetConnection(HTTPServerPtr server, int *idle_return)
 
     if(j >= 0) {
         *idle_return = idle;
+        VerboseDebug("Returning first good candidate: %d\n",j);
         return server->connection[j];
     }
 
@@ -762,22 +795,28 @@ httpServerGetConnection(HTTPServerPtr server, int *idle_return)
         /* Don't open a connection if there are already enough in
            progress, except if the server doesn't do persistent
            connections and there's only one in progress. */
+        VerboseDebug("httpServerGetConnection: Considering additional connection on empty slot (connecting=%d server->persistent=%d)\n",connecting,server->persistent);
         if((connecting == 0 || (server->persistent <= 0 && connecting <= 1)) ||
            connecting < numRequests(server)) {
+            VerboseDebug("... OK, calling httpServerConnection\n");
             httpServerConnection(server);
-        }
-    }
+        } else VerboseDebug("... no, not doing it\n");
+    } else VerboseDebug("httpServerGetConnection: No empty slots (all %d full, change serverSlots and serverMaxSlots if that's a problem)\n",server->numslots);
 
     /* Find a connection that can accept additional requests */
     if(server->version == HTTP_11 && server->pipeline >= 4) {
         for(i = 0; i < serverSlots; i++) {
             if(server->connection[i] && !server->connection[i]->connecting &&
                pipelineIsSmall(server->connection[i])) {
-                if(server->idleHandler[i])
-                    unregisterFdEvent(server->idleHandler[i]);
-                server->idleHandler[i] = NULL;
-                *idle_return = 0;
-                return server->connection[i];
+              VerboseDebug("HTTP_11: pipelineIsSmall on slot %d (if this is a problem, try pipelineAdditionalRequests=0)\n",i);
+              if(server->idleHandler[i]) {
+                VerboseDebug("... unregistering its idle handler\n");
+                unregisterFdEvent(server->idleHandler[i]);
+              }
+              server->idleHandler[i] = NULL;
+              *idle_return = 0;
+              VerboseDebug("... returning it\n");
+              return server->connection[i];
             }
         }
     }
@@ -791,6 +830,7 @@ httpServerTrigger(HTTPServerPtr server)
     HTTPConnectionPtr connection;
     HTTPRequestPtr request;
     int idle, n, i, rc, numidle;
+    VerboseDebug("httpServerTrigger\n");
 
     while(server->request) {
         httpServerDiscardRequests(server);
@@ -914,6 +954,7 @@ httpServerSideRequest(HTTPServerPtr server)
     HTTPRequestPtr requestor = request->request;
     HTTPConnectionPtr client = requestor->connection;
     int rc, i, freeslots, idle, connecting;
+    VerboseDebug("httpServerSideRequest\n");
 
     assert(REQUEST_SIDE(request));
 
@@ -984,6 +1025,7 @@ httpServerDoSide(HTTPConnectionPtr connection)
     HTTPRequestPtr request = connection->request;
     HTTPRequestPtr requestor = request->request;
     HTTPConnectionPtr client = requestor->connection;
+    VerboseDebug("httpServerDoSide\n");
     int len = MIN(client->reqlen - client->reqbegin,
                   connection->bodylen - connection->reqoffset);
     int doflush = 
@@ -1169,6 +1211,7 @@ httpServerFinish(HTTPConnectionPtr connection, int s, int offset)
     HTTPServerPtr server = connection->server;
     HTTPRequestPtr request = connection->request;
     int i;
+    VerboseDebug("httpServerFinish\n");
 
     if(request) {
         assert(connection->pipelined >= 1);
@@ -1371,6 +1414,7 @@ void
 httpServerReply(HTTPConnectionPtr connection, int immediate)
 {
     assert(connection->pipelined > 0);
+    VerboseDebug("httpServerReply\n");
 
     if(connection->request->request == NULL) {
         do_log(L_WARN, "Aborting pipeline on %s:%d.\n",
@@ -1470,6 +1514,7 @@ httpServerRequest(ObjectPtr object, int method, int from, int to,
     char name[132];
     int port;
     int x, y, z;
+    VerboseDebug("httpServerRequest(%s)\n",scrub(object->key));
 
     assert(from >= 0 && (to < 0 || to > from));
     assert(closure == NULL);
@@ -1524,6 +1569,7 @@ int
 httpWriteRequest(HTTPConnectionPtr connection, HTTPRequestPtr request,
                  int bodylen)
 {
+  VerboseDebug("httpWriteRequest\n");
     ObjectPtr object = request->object;
     int from = request->from, to = request->to, method = request->method;
     char *url = object->key, *m;
@@ -1723,7 +1769,7 @@ httpServerHandler(int status,
                   StreamRequestPtr srequest)
 {
     HTTPConnectionPtr connection = srequest->data;
-
+    VerboseDebug("httpServerHandler\n");
     assert(connection->request->object->flags & OBJECT_INPROGRESS);
 
     if(connection->reqlen == 0) {
@@ -1764,7 +1810,7 @@ int
 httpServerSendRequest(HTTPConnectionPtr connection)
 {
     assert(connection->server);
-
+    VerboseDebug("httpServerSendRequest\n");
     if(connection->reqlen == 0) {
         do_log(D_SERVER_REQ, 
                "Writing aborted on 0x%lx\n", (unsigned long)connection);
@@ -1786,6 +1832,7 @@ httpServerReplyHandler(int status,
                        FdEventHandlerPtr event, 
                        StreamRequestPtr srequest)
 {
+  VerboseDebug("httpServerReplyHandler\n");
     HTTPConnectionPtr connection = srequest->data;
     HTTPRequestPtr request = connection->request;
     int i, body;
@@ -1863,6 +1910,7 @@ httpServerHandlerHeaders(int eof,
                          StreamRequestPtr srequest, 
                          HTTPConnectionPtr connection)
 {
+  VerboseDebug("httpServerHandlerHeaders\n");
     HTTPRequestPtr request = connection->request;
     ObjectPtr object = request->object;
     int rc;
@@ -2397,6 +2445,7 @@ httpServerHandlerHeaders(int eof,
 int
 httpServerIndirectHandlerCommon(HTTPConnectionPtr connection, int eof)
 {
+  VerboseDebug("httpServerIndirectHandlerCommon\n");
     HTTPRequestPtr request = connection->request;
 
     assert(eof >= 0);
@@ -2484,6 +2533,7 @@ httpServerIndirectHandler(int status,
 int
 httpServerReadData(HTTPConnectionPtr connection, int immediate)
 {
+  VerboseDebug("httpServerReadData\n");
     HTTPRequestPtr request = connection->request;
     ObjectPtr object = request->object;
     int to = -1;
@@ -2595,6 +2645,7 @@ httpServerDirectHandlerCommon(int kind, int status,
                               FdEventHandlerPtr event, 
                               StreamRequestPtr srequest)
 {
+  VerboseDebug("httpServerDirectHandlerCommon\n");
     HTTPConnectionPtr connection = srequest->data;
     HTTPRequestPtr request = connection->request;
     ObjectPtr object = request->object;
@@ -2796,6 +2847,8 @@ connectionAddData(HTTPConnectionPtr connection, int skip)
     }
 }
 
+/* Output for http://localhost:8123/polipo2/servers?
+   if disableServersList=no (see local.c) */
 void
 listServers(FILE *out)
 {
