@@ -484,6 +484,7 @@ runTimeEventQueue()
 
     while(timeEventQueue && 
           timeval_cmp(&timeEventQueue->time, &current_time) <= 0) {
+      /* VerboseDebug("runTimeEventQueue running an item... "); */
         event = timeEventQueue;
         timeEventQueue = event->next;
         if(timeEventQueue)
@@ -493,6 +494,7 @@ runTimeEventQueue()
         done = event->handler(event);
         assert(done);
         free(event);
+      /* VerboseDebug("runTimeEventQueue done item\n"); */
     }
 }
 
@@ -632,6 +634,7 @@ eventLoop()
 
     while(1) {
     again:
+      /* VerboseDebug("Event loop\n"); */
         if(exitFlag) {
             if(exitFlag < 3)
                 reopenLog();
@@ -649,8 +652,10 @@ eventLoop()
 
         timeToSleep(&sleep_time);
         if(sleep_time.tv_sec == -1) {
+          VerboseDebug("poll 1 (%d FDs, wait=%d)... ",fdEventNum,(diskIsClean ? -1 : idleTime * 1000));
             rc = poll(poll_fds, fdEventNum, 
                       diskIsClean ? -1 : idleTime * 1000);
+          VerboseDebug("poll 1 done\n");
         } else if(timeval_cmp(&sleep_time, &current_time) <= 0) {
             runTimeEventQueue();
             continue;
@@ -663,8 +668,10 @@ eventLoop()
                 int t;
                 timeval_minus(&timeout, &sleep_time, &current_time);
                 t = timeout.tv_sec * 1000 + (timeout.tv_usec + 999) / 1000;
+                VerboseDebug("poll 2 (%d FDs, wait=%d)... ",fdEventNum,(diskIsClean ? t : MIN(idleTime * 1000, t)));
                 rc = poll(poll_fds, fdEventNum,
                           diskIsClean ? t : MIN(idleTime * 1000, t));
+                VerboseDebug("poll 2 done\n");
             }
         }
 
@@ -687,6 +694,7 @@ eventLoop()
         }
 
         if(rc == 0) {
+          /* VerboseDebug("rc==0\n"); */
             if(!diskIsClean) {
                 timeToSleep(&sleep_time);
                 if(timeval_cmp(&sleep_time, &current_time) > 0)
@@ -711,7 +719,9 @@ eventLoop()
                 event = findEvent(poll_fds[j].revents, fdEvents[j]);
                 if(!event)
                     continue;
+                /* VerboseDebug("handler... "); */
                 done = event->handler(0, event);
+                /* VerboseDebug("handler done\n"); */
                 if(done) {
                     if(fds_invalid)
                         unregisterFdEvent(event);

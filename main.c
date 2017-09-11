@@ -47,6 +47,8 @@ main(int argc, char **argv)
     int rc;
     int expire = 0, printConfig = 0;
 
+    /* VerboseDebug("polipo2 starting main()\n"); */
+
     initAtoms();
     CONFIG_VARIABLE(daemonise, CONFIG_BOOLEAN, "Run as a daemon");
     CONFIG_VARIABLE(pidFile, CONFIG_ATOM, "File with pid of running daemon.");
@@ -165,7 +167,9 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    VerboseDebug("polipo2 entering eventLoop\n");
     eventLoop();
+    VerboseDebug("polipo2 left eventLoop\n");
 
     if(pidFile) unlink(pidFile->string);
     return 0;
