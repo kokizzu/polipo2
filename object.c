@@ -129,7 +129,7 @@ findObject(int type, const void *key, int key_size)
     int h;
     ObjectPtr object;
 
-    if(key_size >= 50000)
+    if(key == NULL || key_size >= 50000)
         return NULL;
 
     h = hash(type, key, key_size, log2ObjectHashTableSize);
