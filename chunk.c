@@ -61,7 +61,7 @@ initChunksCommon()
         else
             chunkHighMark = 24 * MB;
         chunkHighMark = MIN(chunkHighMark, 24 * MB);
-        chunkHighMark = MAX(chunkHighMark, 8 * CHUNK_SIZE);
+        chunkHighMark = MAX(chunkHighMark, 8 * CHUNK_SIZE); /* chunk.h defaults (can be overriden at compile time) 8*4K on 32-bit, 8*8K on 64 */
     }
 
     if(chunkHighMark < MB / 2)

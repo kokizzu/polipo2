@@ -1590,9 +1590,11 @@ httpServeObject(HTTPConnectionPtr connection,int recursionLevel)
 
     httpSetTimeout(connection, -1);
 
-    if (recursionLevel > 20 )
+    if (recursionLevel > 20 ) {
+      unlockChunk(object, i);
       return httpClientRawError(connection,
                                       500, internAtom("Polipo2 recursionLevel guard failed."), 0);
+    }
 
     if((request->error_code && relaxTransparency <= 0) ||
        object->flags & OBJECT_INITIAL) {

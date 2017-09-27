@@ -664,7 +664,11 @@ destroyObject(ObjectPtr object)
         if(object->etag) free(object->etag);
         if(object->via) releaseAtom(object->via);
         for(i = 0; i < object->numchunks; i++) {
-            assert(!object->chunks[i].locked);
+            if (object->chunks[i].locked) {
+              /* This is bad news.  How did we end up with a
+                 reference count of 0 when we're locked ? */
+              do_log(L_ERROR, "Object still locked when no references left: forgotten unlockChunk?\n");
+            }
             if(object->chunks[i].data)
                 dispose_chunk(object->chunks[i].data);
             object->chunks[i].data = NULL;
