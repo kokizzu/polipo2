@@ -84,6 +84,11 @@ void
 initObject()
 {
     int q;
+    if(objectHighMark == 0) {
+      extern int chunkHighMark;
+      objectHighMark = chunkHighMark / 12288; /* 2048 for every 24M in chunkHighMark */
+      if (objectHighMark < 2048) objectHighMark = 2048;
+    }
     if(objectHighMark < 16) {
         objectHighMark = 16;
         do_log(L_WARN, "Impossibly low objectHighMark -- setting to %d.\n",

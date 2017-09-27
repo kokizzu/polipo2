@@ -60,7 +60,10 @@ initChunksCommon()
             chunkHighMark = mem / 4;
         else
             chunkHighMark = 24 * MB;
-        chunkHighMark = MIN(chunkHighMark, 24 * MB);
+        extern AtomPtr diskCacheRoot;
+        if (*diskCacheRoot->string) /* there's disk cache */
+          chunkHighMark = MIN(chunkHighMark, 24 * MB);
+        /* else leave it at 25% of the physical RAM */
         chunkHighMark = MAX(chunkHighMark, 8 * CHUNK_SIZE); /* chunk.h defaults (can be overriden at compile time) 8*4K on 32-bit, 8*8K on 64 */
     }
 
