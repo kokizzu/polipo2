@@ -230,7 +230,7 @@ httpClientFinish(HTTPConnectionPtr connection, int s)
            into the queue */
         if(connection->request) {
             if(connection->request->object != NULL)
-                httpClientNoticeRequest(connection->request, 1);
+              httpClientNoticeRequest(connection->request, 1,0);
             else
                 assert(connection->flags & CONN_READER);
         }
@@ -500,7 +500,7 @@ httpClientNoticeErrorHeaders(HTTPRequestPtr request, int code, AtomPtr message,
     request->error_code = code;
     request->error_message = message;
     request->error_headers = headers;
-    httpClientNoticeRequest(request, 0);
+    httpClientNoticeRequest(request, 0,0);
     return 1;
 }
 
@@ -557,7 +557,7 @@ httpClientNewError(HTTPConnectionPtr connection, int method, int persist,
     request->error_message = message;
 
     httpQueueRequest(connection, request);
-    httpClientNoticeRequest(request, 0);
+    httpClientNoticeRequest(request, 0,0);
     return 1;
 }
         
@@ -947,7 +947,7 @@ httpClientRequestContinue(int forbidden_code, AtomPtr url,
     request->object = object;
 
     httpClientDiscardBody(connection);
-    httpClientNoticeRequest(request, 0);
+    httpClientNoticeRequest(request, 0,0);
     return 1;
 }
 
@@ -1075,7 +1075,7 @@ httpClientDiscardHandler(int status,
 }
 
 int
-httpClientNoticeRequest(HTTPRequestPtr request, int novalidate)
+httpClientNoticeRequest(HTTPRequestPtr request, int novalidate, int recursionLevel)
 {
     HTTPConnectionPtr connection = request->connection;
     ObjectPtr object = request->object;
@@ -1208,7 +1208,7 @@ httpClientNoticeRequest(HTTPRequestPtr request, int novalidate)
         if(serveNow) {
             connection->flags |= CONN_WRITER;
             lockChunk(request->object, request->from / CHUNK_SIZE);
-            return httpServeObject(connection);
+            return httpServeObject(connection,recursionLevel+1);
         } else {
             return 1;
         }
@@ -1275,7 +1275,7 @@ static int
 httpClientNoticeRequestDelayed(TimeEventHandlerPtr event)
 {
     HTTPRequestPtr request = *(HTTPRequestPtr*)event->data;
-    httpClientNoticeRequest(request, 0);
+    httpClientNoticeRequest(request, 0,0);
     return 1;
 }
 
@@ -1502,7 +1502,7 @@ httpClientSideRequest(HTTPRequestPtr request)
         return 1;
     }
         
-    return httpClientNoticeRequest(request, 0);
+    return httpClientNoticeRequest(request, 0,0);
 }
 
 int 
@@ -1575,7 +1575,7 @@ httpClientSideHandler(int status,
 }
 
 int 
-httpServeObject(HTTPConnectionPtr connection)
+httpServeObject(HTTPConnectionPtr connection,int recursionLevel)
 {
     HTTPRequestPtr request = connection->request;
     ObjectPtr object = request->object;
@@ -1589,6 +1589,10 @@ httpServeObject(HTTPConnectionPtr connection)
     objectMetadataChanged(object, 0);
 
     httpSetTimeout(connection, -1);
+
+    if (recursionLevel > 20 )
+      return httpClientRawError(connection,
+                                      500, internAtom("Polipo2 recursionLevel guard failed."), 0);
 
     if((request->error_code && relaxTransparency <= 0) ||
        object->flags & OBJECT_INITIAL) {
@@ -1663,7 +1667,7 @@ httpServeObject(HTTPConnectionPtr connection)
         }
         request->object = object;
         connection->flags &= ~CONN_WRITER;
-        return httpClientNoticeRequest(request, 1);
+        return httpClientNoticeRequest(request, 1,recursionLevel+1);
     }
 
     if(object->flags & OBJECT_ABORTED) {
@@ -1829,7 +1833,7 @@ static int
 httpServeObjectDelayed(TimeEventHandlerPtr event)
 {
     HTTPConnectionPtr connection = *(HTTPConnectionPtr*)event->data;
-    httpServeObject(connection);
+    httpServeObject(connection,0);
     return 1;
 }
 

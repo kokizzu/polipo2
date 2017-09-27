@@ -49,8 +49,8 @@ int httpClientGetHandler(int, ConditionHandlerPtr);
 int httpClientHandlerHeaders(FdEventHandlerPtr event, 
                                 StreamRequestPtr request,
                                 HTTPConnectionPtr connection);
-int httpClientNoticeRequest(HTTPRequestPtr request, int);
-int httpServeObject(HTTPConnectionPtr);
+int httpClientNoticeRequest(HTTPRequestPtr request, int,int);
+int httpServeObject(HTTPConnectionPtr,int);
 int delayedHttpServeObject(HTTPConnectionPtr connection);
 int httpServeObjectStreamHandler(int status, 
                                  FdEventHandlerPtr event,

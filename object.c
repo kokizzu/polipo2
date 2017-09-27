@@ -132,6 +132,11 @@ findObject(int type, const void *key, int key_size)
     if(key == NULL || key_size >= 50000)
         return NULL;
 
+    /* The following line will segfault if key is a dangling
+       pointer or key_size is incorrect.  recursionLevel
+       check added to client.c because gdb notices thousands
+       of mutual calls between httpServeObject and
+       httpClientNoticeRequest when this happens. */
     h = hash(type, key, key_size, log2ObjectHashTableSize);
     object = objectHashTable[h];
     if(!object)
