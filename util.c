@@ -1,6 +1,6 @@
 /*
 Copyright (c) 2003-2007 by Juliusz Chroboczek
-Copyright (c) 2017-2019 by Silas S. Brown
+Copyright (c) 2017-2020 by Silas S. Brown
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
