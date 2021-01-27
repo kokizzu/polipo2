@@ -6,8 +6,8 @@ installation) for more information.
 The original Polipo was developed by Juliusz Chroboczek from
 2003 and was maintained by him up until November 2016.
 
-This Polipo2 fork is maintained by Silas S. Brown.  It is NOT
-intended for general use - as Juliusz said when he stepped
+This Polipo2 fork is maintained by Silas S. Brown.  It is **not**
+intended for general use—as Juliusz said when he stepped
 down, caching proxies are becoming obsolete for general use
 due to the increasing prevalence of encrypted alternatives to
 HTTP that reduce caching proxies to simple relays.  If all
