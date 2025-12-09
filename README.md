@@ -34,13 +34,15 @@ If that’s your situation, I’d recommend switching to Squid, which is more sc
 
 * If using Squid with Web Adjuster’s `--upstream-proxy=:3128`, my suggested starting point is `--run="squid -N -f squid.conf -u 0"` with a `squid.conf` like:
 
-    http_port 127.0.0.1:3128
-    http_access allow localhost
-    cache_peer 127.0.0.1 parent 3129 0 no-query no-digest
-    never_direct allow all
-    dead_peer_timeout 99 seconds
-    access_log none localhost
-    cache_mem 256 MB
+```
+http_port 127.0.0.1:3128
+http_access allow localhost
+cache_peer 127.0.0.1 parent 3129 0 no-query no-digest
+never_direct allow all
+dead_peer_timeout 99 seconds
+access_log none localhost
+cache_mem 256 MB
+```
 
 (see Squid’s `cache_dir` directive if you also want a disk cache)
 
